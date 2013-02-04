@@ -1,6 +1,6 @@
 /*jshint evil:true */
 /*global Reveal:true, window:true, document:true, setTimeout:true,
-  ace:true, TypeScript:true, console:true */
+  ace:true, TypeScript:true, console:true, Node:true, Text:true */
 
 (function() {
 
@@ -121,22 +121,56 @@
     return sig.slice(0, i);
   };
 
-  var flashEditor = function(editor, type) {
-    editor.container.classList.add("flash-" + type);
-    setTimeout(function() {
-      editor.container.classList.remove("flash-" + type);
-    }, 50);
+  var describeAttrs = function(node) {
+    var attrs = node.attributes, i = 0, l = attrs ? attrs.length : 0, o = "", attr;
+    if (l === 0) return "";
+    for (; i < l; i++) {
+      attr = attrs.item(i);
+      o += " " + attr.nodeName + "=\"" + attr.nodeValue + "\"";
+    }
+    return o;
+  };
+
+  var describeContent = function(node) {
+    if (node.childNodes.length > 0 && node.childNodes.item(0) instanceof Text)
+      return node.childNodes.item(0).nodeValue.trim();
+    else return "...";
+  };
+
+  var describeNode = function(node) {
+    var s = "<" + node.nodeName.toLowerCase() + describeAttrs(node);
+    if (node.childNodes && node.childNodes.length)
+      s += ">" + describeContent(node) + "</" + node.nodeName.toLowerCase() + ">";
+    else if (node.nodeValue && node.nodeValue.length)
+      s += ">" + node.nodeValue + "</" + node.nodeName.toLowerCase() + ">";
+    else s += "/>";
+    return s;
+  };
+
+  var describeValue = function(k, v) {
+    if (typeof v === "function") return describeFunction(v);
+    if (v instanceof Node) return describeNode(v);
+    console.log(v);
+    return v;
   };
 
   var stringify = function(obj) {
-    var out = JSON.stringify(obj);
-    return (out.length > 60) ? JSON.stringify(obj, null, 2) : out;
+    console.log("stringify", obj);
+    var out = JSON.stringify(obj, describeValue);
+    return (out.length > 60) ? JSON.stringify(obj, describeValue, 2) : out;
   };
 
   var commentify = function(prefix, msg) {
     return msg.split("\n").map(function(s) {
       return "//" + prefix + " " + s;
     }).join("\n");
+  };
+
+  var flashEditor = function(editor, type) {
+    editor.container.classList.add("flash-" + type);
+    setTimeout(function() {
+      editor.container.classList.remove("flash-" + type);
+    }, 50);
   };
 
   var evaluateExpAtPoint = function(editor) {
@@ -195,8 +229,7 @@
         out += "\n//=> " + expr.error;
         errors = true;
       } else if (expr.result !== undefined) {
-        val = typeof expr.result === "function" ? describeFunction(expr.result)
-          : stringify(expr.result);
+        val = stringify(expr.result);
         out += "\n" + commentify("=>", val);
       }
     });
