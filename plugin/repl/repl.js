@@ -150,12 +150,10 @@
   var describeValue = function(k, v) {
     if (typeof v === "function") return describeFunction(v);
     if (v instanceof Node) return describeNode(v);
-    console.log(v);
     return v;
   };
 
   var stringify = function(obj) {
-    console.log("stringify", obj);
     var out = JSON.stringify(obj, describeValue);
     return (out.length > 60) ? JSON.stringify(obj, describeValue, 2) : out;
   };
@@ -373,7 +371,7 @@
         if (replTimer !== null) window.clearTimeout(replTimer);
         replTimer = setTimeout(function() {
           replTimer = null;
-          installRepl(currentRepl);
+          installRepl(currentRepl, findContext(Reveal.getCurrentSlide()));
         }, 1000);
       }
     });
