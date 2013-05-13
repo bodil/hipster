@@ -275,6 +275,13 @@
       exec: function() { editor.selection.moveCursorLineEnd(); }
     });
 
+    editor.commands.addCommand({
+      name: "forLoop",
+      bindKey: "Ctrl-F",
+      exec: function() { editor.insert("for (i = 0; i < list.length; i++) {}");
+                  editor.selection.moveCursorLeft(); }
+    });
+
     return editor;
   };
 
