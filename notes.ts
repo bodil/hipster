@@ -1,3 +1,15 @@
+// First class functions
+
+hello();
+
+hello;
+
+function callThis(f: Function) {
+  return f();
+}
+
+callThis(hello);
+
 // Functor
 
 function map(func: (a: any) => any, list: any[]): any[] {
